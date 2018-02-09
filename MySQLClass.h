@@ -36,10 +36,6 @@ private:
 
 	sql::Driver *driver;
 	std::unique_ptr< sql::Connection > _con;
-
-    std::unique_ptr< sql::PreparedStatement > _userGetAllStatement;
-
-	std::unique_ptr< sql::ResultSet > _resultSet;
 };
 
 #endif // MYSQLCLASS_H

@@ -37,27 +37,10 @@ void MySQLClass::printError(sql::SQLException &e)
 }
 
 
-void MySQLClass::setupDatabase()
-{
-  
-    /*
-   std::string userGetAll = "SELECT hashedpw, salt, UUID, triesleft FROM userinfo WHERE userid = (?)";
-
-    try
-    {
-    _hashStatement.reset(_con->prepareStatement(hashStatement));
-    }
-    catch(sql::SQLException &e)
-    {
-       printError(e);
-    }
-    */
-
-}
-
 bool MySQLClass::isConnected()
 {
-
+    /// work on this later
+    return true;
 }
 
 bool MySQLClass::loadTable(const std::string &tableName)
