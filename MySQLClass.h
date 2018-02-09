@@ -27,11 +27,11 @@ public:
 	~MySQLClass();
 	bool isConnected();
     bool loadTable(const std::string &tableName);
-    MYSQLTable* getLoadedTable(const std::string &tableName);
+    MYSQLTable* getTable(const std::string &tableName);
 private:
 	std::string _databaseName, _hostName, _user, _pw;
     std::vector<MYSQLTable*> _tables;
-	void setupDatabase();
+
 	void printError(sql::SQLException &e);
 
 	sql::Driver *driver;

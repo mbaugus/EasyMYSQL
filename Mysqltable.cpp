@@ -2,6 +2,10 @@
 
 #include <MySQLClass.h>
 
+#include <iostream>
+
+using namespace std;
+
 MYSQLTable::MYSQLTable(const std::string &tableName, MySQLClass* sql)
 {
     _sql = sql;
@@ -17,16 +21,10 @@ void MYSQLTable::addColumn(const std::string &rowName, const std::string &typeNa
     
 }
 
-
-bool MYSQLTable::changeValue(const std::string &column,const std::string &value)
+void MYSQLTable::debugTemplate(std::string name)
 {
-    
-}
-bool MYSQLTable::changeValue(const std::string &column, const int value)
-{
-    
-}
-bool MYSQLTable::changeValue(const std::string &column, const bool value)
-{
-    
+	auto v = _magic[name];
+	for(int i = 0; i < v.size(); i++){
+		cout << v[i] << endl;
+	}
 }

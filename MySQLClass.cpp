@@ -18,7 +18,7 @@ MySQLClass::MySQLClass(const std::string &hostName, const std::string &user, con
         catch(sql::SQLException &e){
            printError(e);
         }
-        setupDatabase();
+	
 }
 
 MySQLClass::~MySQLClass()
@@ -75,7 +75,11 @@ bool MySQLClass::loadTable(const std::string &tableName)
     }
 }
 
-MYSQLTable* getLoadedTable(const std::string &tableName)
+MYSQLTable* MySQLClass::getTable(const std::string &tableName)
 {
-        
+	for(size_t i = 0; i < _tables.size(); i++){
+		if(_tables[i]->getName() == tableName)
+			return _tables[i];
+	}
+	return 0;
 }
