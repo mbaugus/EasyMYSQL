@@ -18,6 +18,7 @@ Table::~Table()
     
 }
 
+
 void Table::addColumn(const std::string &rowName, sqltypes type, int varcharsize /*=0*/)
 {
     ColumnInfo ci;

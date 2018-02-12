@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <typeinfo>
 
 #include <map>
 #include <iostream>
@@ -80,12 +81,31 @@ public:
     {
         
     }
-    
-    template<typename T, typename T2, typename T3, typename T4 ...Args>
+	
+	
+	void addTemplate(){}
+    template<typename T, typename T2, typename ...Args>
    // void addTemplate("RoomSave",
     //      {"Description", "Holiday", "Flippy"},
     //      &Test::a, &Test::b, &Test::c);
-    void addTemplate(
+    void addTemplate(std::string name, std::initializer_list<T> il, T2 Value, Args... args)
+	{
+		std::cout << "BluPrint name: " << name << std::endl;
+		_currentSaveName = name;
+		if(!checkListToTableMembers(il)){
+			std::cout << "SQL Rows Name didnt match our provided names" << std::endl;
+			return; /// a listed description didnt match the database name for variable.
+		}
+		std::cout << typeid(decltype(Value)).name() << std::endl;
+		addTemplate(args...);
+	}
+	template<typename T, typename ...Args>
+	void addTemplate(T Value, Args... args)
+	{
+		std::cout << typeid(decltype(Value)).name() << std::endl;
+		addTemplate(args...);
+	}
+	
     
    // We want to Register a member variable with a blueprint name.  
     //example, ("SavePlayer", Player::name);  we need to pass the 
@@ -140,6 +160,26 @@ public:
 	}*/
     private:
     /// add a Save class blueprint... templates
+	template<typename T>
+	bool checkListToTableMembers(std::initializer_list<T> il)
+	{
+		for(auto i = il.begin(); i != il.end(); ++i){
+			bool found = false;
+			for(int x = 0; x < _columns.size(); x++){
+				if( (*i) == _columns[x]._name){
+					found = true;
+					std::cout << (*i) << std::endl;
+				}
+			}
+			if(!found){
+				return false; /// something was on our descriptor that isn't a column name in SQL.
+			}
+        }
+		
+		return true;
+	}
+	
+	
     void addSaveClass() { }
     void Insert(){ }
     
@@ -152,12 +192,16 @@ public:
 
     std::vector<ColumnInfo> _columns;
 	std::map<std::string, std::vector<std::string> > _magic;
+	std::map<std::string, BluePrint> _blueprints;
+	
     //std::map<std::string, std::vector<std::tuple<
     bool _isValid;
 	std::string _name;
     MySQL *_sql;
     std::string _currentSaveName;
     std::vector<std::string> *_currentTemplate;
+	BluePrint* _currentBluePrint;
+	
 };
 }
 #endif // TABLE_H
