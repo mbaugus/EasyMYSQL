@@ -37,7 +37,7 @@ public:
         auto it = _magic.find(Name);
         std::cout << "Create some" << std::endl;
         if(it == _magic.end()){
-            std::cout << "Create some shit" << std::endl;
+            std::cout << "Create some stuff" << std::endl;
             std::vector<std::string> v;
             _magic[Name] = v;
         }
@@ -83,7 +83,7 @@ public:
     
     template<typename T, typename T2, typename T3, typename T4 ...Args>
    // void addTemplate("RoomSave",
-    //      {"Description", "Holiday", "Fuckoff"},
+    //      {"Description", "Holiday", "Flippy"},
     //      &Test::a, &Test::b, &Test::c);
     void addTemplate(
     
