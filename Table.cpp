@@ -18,6 +18,13 @@ Table::~Table()
     
 }
 
+std::string Table::listRows()
+{
+    for(int i = 0; i < _columns.size();i++){
+		cout << _columns[i]._name << endl;
+	}
+}
+
 
 void Table::addColumn(const std::string &rowName, sqltypes type, int varcharsize /*=0*/)
 {

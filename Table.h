@@ -27,6 +27,7 @@ public:
     Table(const std::string tableName, MySQL *msql);
     ~Table();
 	std::string getName() {return _name;}
+    std::string listRows();
     void addColumn(const std::string &rowName, sqltypes type, int varcharsize = 0);
     size_t size() { std::cout << "Columns: " << _columns.size() << std::endl; return _columns.size();}
 	// vew easy template to see if worked.
@@ -90,7 +91,7 @@ public:
     //      &Test::a, &Test::b, &Test::c);
     void addTemplate(std::string name, std::initializer_list<T> il, T2 Value, Args... args)
 	{
-		std::cout << "BluPrint name: " << name << std::endl;
+		std::cout << "BluePrint name: " << name << std::endl;
 		_currentSaveName = name;
 		if(!checkListToTableMembers(il)){
 			std::cout << "SQL Rows Name didnt match our provided names" << std::endl;
