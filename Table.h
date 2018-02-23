@@ -15,6 +15,9 @@
 #include "BluePrintDataType.h"
 #include "ColumnInfo.h"
 
+#include "cppconn/prepared_statement.h"
+
+
 namespace EZSQL
 {
     
@@ -29,26 +32,12 @@ public:
 	std::string getName() {return _name;}
     std::string listRows();
     void addColumn(const std::string &rowName, sqltypes type, int varcharsize = 0);
+	void listColumns();
+	
     size_t size() { std::cout << "Columns: " << _columns.size() << std::endl; return _columns.size();}
 	// vew easy template to see if worked.
 	void debugTemplate(const std::string name);
     
-    
-	template<typename T>
-	void addSaveTemplate(std::string Name, std::initializer_list<T> il){
-        auto it = _magic.find(Name);
-        std::cout << "Create some" << std::endl;
-        if(it == _magic.end()){
-            std::cout << "Create some stuff" << std::endl;
-            std::vector<std::string> v;
-            _magic[Name] = v;
-        }
-        it = _magic.find(Name);
-        
-        for(auto i = il.begin(); i != il.end(); ++i){
-            it->second.push_back((*i));
-        }
-    }
     
     //template <class C, typename T>
     //T getPointerType(T C::*v);
@@ -56,13 +45,7 @@ public:
     template<typename T, typename T2, typename T3>
     void mess(T valueType, T2 theClass, T3 theMember)
     {
-       // struct BluePrintDataType;
         BluePrintDataType<T3> mdata(theMember);
-        
-        //BluePrint bp(_sql->getConnection(), "Room");
-        //bp.addTag("Fox", sqltypes::VARCHAR);
-        //bp.addTag("Hen", sqltypes::VARCHAR);
-        //bp.addTag("Lego", sqltypes::VARCHAR);
         
         //std::cout << theClass.*theMember << std::endl;
         std::cout << theClass.*mdata.memberPointer << std::endl;
@@ -77,61 +60,51 @@ public:
         //}
     }
     
-    template<typename T>
-    void messier(T value)
-    {
-        
-    }
-	
-	
-	void addTemplate(){}
     template<typename T, typename T2, typename ...Args>
-   // void addTemplate("RoomSave",
-    //      {"Description", "Holiday", "Flippy"},
-    //      &Test::a, &Test::b, &Test::c);
+
     void addTemplate(std::string name, std::initializer_list<T> il, T2 Value, Args... args)
 	{
 		std::cout << "BluePrint name: " << name << std::endl;
 		_currentSaveName = name;
-		if(!checkListToTableMembers(il)){
+		_columnNameInit.clear();
+		_columnNameInit.insert(_columnNameInit.end(), il.begin(), il.end());
+		
+        if(_columnNameInit.size() == 0){
+			std::cout << "You have to incude at least 1 column name" << std::endl;
+			return; /// a listed description didnt match the database name for variable.
+		}
+		if(!checkListToTableMembers()){
 			std::cout << "SQL Rows Name didnt match our provided names" << std::endl;
 			return; /// a listed description didnt match the database name for variable.
 		}
-		std::cout << typeid(decltype(Value)).name() << std::endl;
-		addTemplate(args...);
-	}
-	template<typename T, typename ...Args>
-	void addTemplate(T Value, Args... args)
-	{
-		std::cout << typeid(decltype(Value)).name() << std::endl;
+		
+		_blueprints.emplace(name, BluePrint(_sql, _name));
+		_columnNameInitCurrentIndex = 0;
+		BluePrintDataType<T2> *bp = new BluePrintDataType<T2>(Value);
+		_blueprints[name].addTag(_columnNameInit[0], sqltypes::VARCHAR, (BluePrintDataType_Base*)bp);
+		_columnNameInitCurrentIndex++;
+		std::cout << "Adding tag." << std::endl;
+        //std::cout << theClass.*theMember << std::endl;
+       // std::cout << "What" << mdata.memberPointer << std::endl;
+		//std::cout << "What1: " << typeid(decltype(Value)).name() << std::endl;
+		//BluePrint::addTag()
+		//_blueprints[name] = BluePrint(_sql, namelist[0]);
+		// m0.insert(std::pair<std::string, Food>("Key", Food("Ice Cream")));
+		
 		addTemplate(args...);
 	}
 	
-    
-   // We want to Register a member variable with a blueprint name.  
-    //example, ("SavePlayer", Player::name);  we need to pass the 
-    // ("SavePlayer", &Player::name, )
-
-    
-    template<typename T, typename ...Args>
-    void addSaveClass(std::string templateName, T value, Args... args)
-    {
-        //auto it = _SaveClassBluePrints.find(templateName);
-       // if(it != _SaveClassBluePrints.end()){
-            /// already template saved by that name
-         //   return;
-        //}
-    }
-    
-    
-    
-    /// save class from a blueprint ...templates
-    template<typename T>
-    void saveClass(std::string templateName, T& classReference)
-    {
-        
-    }
-    
+	template<typename T, typename ...Args>
+	void addTemplate(T Value, Args... args)
+	{
+		BluePrintDataType<T> *bp = new BluePrintDataType<T>(Value);
+		_blueprints[_currentSaveName].addTag(_columnNameInit[_columnNameInitCurrentIndex], sqltypes::VARCHAR, (BluePrintDataType_Base*)bp);
+		_columnNameInitCurrentIndex++;
+		std::cout << "Adding tag." << std::endl;
+		//std::cout << "Valuetype: " << typeid(decltype(Value)).name() << std::endl;
+		addTemplate(args...);
+	}
+	
     
     /// sets the name of the save templated we're gonna work with.
     /// the next template function called is the one that only takes a value and arguments
@@ -149,6 +122,45 @@ public:
         
         Insert(args...);
     }
+	
+	
+	template<typename T, typename T2>
+	bool Save(T name, T2 tclass)
+	{
+		
+		auto it = _blueprints.find(name);
+		if( it == _blueprints.end() ){
+			return false;
+		}
+		
+		int length = (*it).second.Tags.size();
+		std::shared_ptr<sql::PreparedStatement> statement = (*it).second.getSaveStatement();
+		
+		std::cout << "Length" << length << std::endl;
+		
+		auto tpl = it->second.Tags[0];
+		//for(int i = 0; i < (*it).second.Tags.size(); i++){
+		//	std::cout << "Hello" << std::endl;
+		//}
+		//std::cout << theClass.*theMember << std::endl;
+		
+		/*
+		for(int i = 0; i < it->second.Tags.size(); i++){
+			std::string mname = std::get<0>(it->second.Tags[i]);
+			sqltypes mtype = std::get<1>(it->second.Tags[i]);
+			switch(mtype){
+				case sqltypes::INTEGER:
+					//BluePrintDataType_Base* p = (BluePrintDataType*)std::get<2>(it->second.Tags[i]);
+					//statement->setInt( i+1, tclass.*p );
+					break;
+				case sqltypes::VARCHAR:
+					//statement->setString(i+1, tclass.*std::get<2>(it->second.Tags[i]));
+				break;
+			}
+		}*/
+		statement->execute();
+		return true;
+	}
     
 
 	// update an entire record/row in SQL.  give column name, primary key of row to update, 
@@ -161,36 +173,21 @@ public:
 	}*/
     private:
     /// add a Save class blueprint... templates
-	template<typename T>
-	bool checkListToTableMembers(std::initializer_list<T> il)
-	{
-		for(auto i = il.begin(); i != il.end(); ++i){
-			bool found = false;
-			for(int x = 0; x < _columns.size(); x++){
-				if( (*i) == _columns[x]._name){
-					found = true;
-					std::cout << (*i) << std::endl;
-				}
-			}
-			if(!found){
-				return false; /// something was on our descriptor that isn't a column name in SQL.
-			}
-        }
-		
-		return true;
-	}
+	bool checkListToTableMembers();
 	
 	
     void addSaveClass() { }
     void Insert(){ }
-    
+    void addTemplate(){ }
         
     template<typename T, typename ...Args>
     void Insert(T value, Args... args){
         std::cout << "Current Save Name: " << _currentSaveName << " : " << value << std::endl;
         Insert(args...);
     }
-
+	
+    std::vector<std::string> _columnNameInit;
+	int _columnNameInitCurrentIndex;
     std::vector<ColumnInfo> _columns;
 	std::map<std::string, std::vector<std::string> > _magic;
 	std::map<std::string, BluePrint> _blueprints;

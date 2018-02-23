@@ -25,6 +25,30 @@ std::string Table::listRows()
 	}
 }
 
+bool Table::checkListToTableMembers()
+{
+	for(auto i = _columnNameInit.begin(); i != _columnNameInit.end(); ++i){
+		bool found = false;
+		for(int x = 0; x < _columns.size(); x++){
+			if( (*i) == _columns[x]._name){
+				found = true;
+				//std::cout << (*i) << std::endl;
+			}
+		}
+		if(!found){
+			return false; /// something was on our descriptor that isn't a column name in SQL.
+		}
+	}
+	return true;
+}
+
+void Table::listColumns()
+{
+	for(int i = 0; i < _columns.size(); i++)
+	{
+		std::cout << _columns[i]._name << " " << _columns[i]._sqltype << " " << _columns[i]._varcharsize << std::endl;
+	}
+}
 
 void Table::addColumn(const std::string &rowName, sqltypes type, int varcharsize /*=0*/)
 {

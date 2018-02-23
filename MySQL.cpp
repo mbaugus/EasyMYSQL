@@ -75,6 +75,8 @@ void MySQL::printError(sql::SQLException &e)
 }
 
 
+
+
 bool MySQL::isConnected()
 {
     /// work on this later

@@ -8,6 +8,7 @@
 
 //#include "MySQL.h"
 #include "ColumnInfo.h"
+#include "BluePrintDataType.h"
 #include "cppconn/prepared_statement.h"
 
 namespace EZSQL
@@ -15,26 +16,28 @@ namespace EZSQL
 
     
 class MySQL;
+class BluePrintDataType_Base;
+
 class BluePrint
 {
 public:
-    BluePrint(MySQL* msql, const std::string name);
+    BluePrint(MySQL* msql, std::string name);
+	BluePrint(){}
     ~BluePrint();
     /// this is the tag you will save by on your table.
     ///  such as UPDATE <table> WHERE 'MATCHTO' = 'VALUE' 
     void setMatchTag(const std::string matchTo);
-    void addTag(std::string name, sqltypes sqltype);
+    void addTag(std::string name, sqltypes sqltype, BluePrintDataType_Base* data);
     void rebuildStatements();
     std::shared_ptr<sql::PreparedStatement> getSaveStatement();
     std::shared_ptr<sql::PreparedStatement> getLoadStatement();
     std::shared_ptr<sql::PreparedStatement> getNewStatement();
-
+	std::vector< std::tuple< std::string, sqltypes, BluePrintDataType_Base* > > Tags;
 private:
     std::string _tableName;
     std::string _name;
     /// match tag defaults to id
     std::string _matchTag;
-    std::vector< std::tuple< std::string, sqltypes> > _tags;
     
     std::shared_ptr<sql::PreparedStatement> _savestatement;
     std::shared_ptr<sql::PreparedStatement> _loadstatement;

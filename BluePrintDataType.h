@@ -13,7 +13,7 @@ namespace EZSQL
         virtual ~BluePrintDataType_Base() {}
     };
     
-    template <class T>
+    template <typename T>
     
     class BluePrintDataType : BluePrintDataType_Base{
     public:
